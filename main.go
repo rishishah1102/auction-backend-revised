@@ -5,7 +5,6 @@ import (
 	"auction-backend/routes"
 	"auction-backend/utils"
 	"context"
-	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
@@ -13,6 +12,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"go.uber.org/zap"
 )
 
 func main() {
@@ -22,7 +22,7 @@ func main() {
 	// Reading logger
 	logger, err := utils.ConfigLogger()
 	if err != nil {
-		fmt.Println(err)
+		zap.Must(zap.NewProduction()).Error(err.Error())
 		return
 	}
 

@@ -5,11 +5,19 @@ import (
 	"os"
 	"strconv"
 
+	"go.uber.org/zap"
 	"gopkg.in/gomail.v2"
 )
 
 // This function is used to send an email
 func SendEmail(recipient string, subject string, otp int) error {
+	// Reading logger
+	logger, err := ConfigLogger()
+	if err != nil {
+		zap.Must(zap.NewProduction()).Error(err.Error())
+		return err
+	}
+
 	// SMTP server config
 	smtpHost := os.Getenv("SMTP_HOST")
 	smtpPort := os.Getenv("SMTP_PORT")
@@ -27,6 +35,7 @@ func SendEmail(recipient string, subject string, otp int) error {
 	// int to string conversion of port
 	port, err := strconv.Atoi(smtpPort)
 	if err != nil {
+		logger.Error(err.Error())
 		return err
 	}
 
@@ -36,6 +45,7 @@ func SendEmail(recipient string, subject string, otp int) error {
 	// sending email
 	err = dialer.DialAndSend(message)
 	if err != nil {
+		logger.Error(err.Error())
 		return err
 	}
 	return nil
