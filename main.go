@@ -36,7 +36,7 @@ func main() {
 
 	// New Server
 	server := &http.Server{
-		Addr:    ":" + os.Getenv("SERVER_PORT"),
+		Addr:    "localhost:" + os.Getenv("PORT"),
 		Handler: router,
 	}
 

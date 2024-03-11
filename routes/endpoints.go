@@ -26,7 +26,7 @@ func EndPoints(router *gin.Engine) {
 	router.POST("/signin", auth.LoginController)
 
 	// // OTP PAGE TO SAVE USER || METHOD POST
-	// router.post("/otp", userOtpController)
+	router.POST("/otp", auth.RegisterOtpController)
 
 	// // OTP PAGE TO LOGIN USER || METHOD POST
 	router.POST("/loginotp", auth.LoginOtpController)
