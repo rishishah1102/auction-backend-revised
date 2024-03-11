@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.uber.org/zap"
 )
@@ -34,13 +35,33 @@ func AddPlayerController(c *gin.Context) {
 		for _, player := range players {
 			// making a match model for every player
 			var match schemas.Match
-			matchData, err := database.Matches.InsertOne(context.Background(), match)
+			matchData, err := database.Matches.InsertOne(context.Background(), bson.M{
+				"match1":            match.Match1,
+				"match2":            match.Match2,
+				"match3":            match.Match3,
+				"match4":            match.Match4,
+				"match5":            match.Match5,
+				"match6":            match.Match6,
+				"match7":            match.Match7,
+				"match8":            match.Match8,
+				"match9":            match.Match9,
+				"match10":           match.Match10,
+				"prevX1":            match.PrevX1,
+				"currentX1":         match.CurrentX1,
+				"nextX1":            match.NextX1,
+				"earnedPoints":      match.EarnedPoints,
+				"benchedPoints":     match.BenchedPoints,
+				"totalPoints":       match.TotalPoints,
+				"prevTotalPoints":   match.PrevTotalPoints,
+				"prevEarnedPoints":  match.PrevEarnedPoints,
+				"prevBenchedPoints": match.PrevBenchedPoints,
+			})
 			if err != nil {
 				logger.Error(err.Error())
 				c.JSON(http.StatusInternalServerError, gin.H{
 					"error": err.Error(),
 				})
-				break
+				return
 			}
 
 			// adding _id of match model to each player
@@ -50,18 +71,33 @@ func AddPlayerController(c *gin.Context) {
 				c.JSON(http.StatusInternalServerError, gin.H{
 					"error": "Cannot convert _id to ObjectID",
 				})
-				break
+				return
 			}
 			player.Match = insertedId
 
 			// inserting player into database
-			_, err = database.Players.InsertOne(context.Background(), player)
+			_, err = database.Players.InsertOne(context.Background(), bson.M{
+				"playerNumber":         player.PlayerNumber,
+				"playerName":           player.PlayerName,
+				"country":              player.Country,
+				"playerType":           player.PlayerType,
+				"iplTeam":              player.IplTeam,
+				"prevTeam":             player.PrevTeam,
+				"currentTeam":          player.CurrentTeam,
+				"basePrice":            player.BasePrice,
+				"prevFantasyPoints":    player.PrevFantasyPoints,
+				"currentFantasyPoints": player.CurrentFantasyPoints,
+				"sellingPrice":         player.SellingPrice,
+				"match":                player.Match,
+				"sold":                 player.Sold,
+				"unsold":               player.Unsold,
+			})
 			if err != nil {
 				logger.Error(err.Error())
 				c.JSON(http.StatusInternalServerError, gin.H{
 					"error": err.Error(),
 				})
-				break
+				return
 			}
 		}
 

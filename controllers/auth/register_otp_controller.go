@@ -6,9 +6,11 @@ import (
 	"auction-backend/schemas"
 	"auction-backend/utils"
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.uber.org/zap"
 )
 
@@ -30,8 +32,10 @@ func RegisterOtpController(c *gin.Context) {
 		return
 	}
 
+	fmt.Println(request.Squad)
+
 	// saving into the database
-	_, err = database.Users.InsertOne(context.Background(), request)
+	_, err = database.Users.InsertOne(context.Background(), bson.M{"email": request.Email, "username": request.Username, "ImgUrl": request.ImgUrl, "teamname": request.Teamname, "squad": request.Squad, "isPlaying": request.IsPlaying, "isAuctioneer": request.IsAuctioneer})
 	if err != nil {
 		logger.Error(err.Error())
 		c.JSON(http.StatusFound, gin.H{
