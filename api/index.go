@@ -30,7 +30,7 @@ func CORSMiddleware() gin.HandlerFunc {
 	}
 }
 
-func Init() {
+func init() {
 	gin.SetMode(gin.ReleaseMode)
 
 	// Reading yaml file
