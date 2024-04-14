@@ -25,7 +25,7 @@ func VerifyToken(c *gin.Context) {
 	// fetching token from header of request
 	headerToken := c.Request.Header.Get("Authorization")
 	if headerToken == "" {
-		logger.Error("A token is required for authentication")
+		logger.Warn("A token is required for authentication")
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"message": "A token is required for authentication",
 		})
@@ -36,7 +36,7 @@ func VerifyToken(c *gin.Context) {
 	token, err := jwt.Parse(headerToken, func(token *jwt.Token) (interface{}, error) {
 		// checking the signing method
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			logger.Error("There was an error matching token sign method.")
+			logger.Error("There was an error matching token sign method.", zap.Error(err))
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
 		}
 		logger.Info("Token is successfully  parsed")
@@ -45,14 +45,14 @@ func VerifyToken(c *gin.Context) {
 
 	// validating token
 	if err != nil {
-		logger.Error(err.Error())
+		logger.Error("token is unauthorized", zap.Error(err))
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"error": err,
 		})
 		return
 	}
 	if !token.Valid {
-		logger.Error("Token is invalid")
+		logger.Warn("token is invalid")
 		c.JSON(http.StatusUnauthorized, gin.H{
 			"error": "Invalid token",
 		})
@@ -62,7 +62,7 @@ func VerifyToken(c *gin.Context) {
 	// fetching claims from token
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		logger.Error("Cannot convert token claims to MapClaims")
+		logger.Warn("cannot convert token claims to MapClaims")
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Failed to parse token claims",
 		})
@@ -72,7 +72,7 @@ func VerifyToken(c *gin.Context) {
 	// extracting email from token claims
 	email, ok := claims["email"].(string)
 	if !ok {
-		logger.Error("Failed to extract email from token claims")
+		logger.Warn("failed to extract email from token claims")
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error": "Failed to extract email from token claims",
 		})

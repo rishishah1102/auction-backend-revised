@@ -22,7 +22,7 @@ func LoginOtpController(c *gin.Context) {
 	// fetching data from body
 	var request schemas.User
 	if err := c.ShouldBindJSON(&request); err != nil {
-		logger.Error(err.Error())
+		logger.Error("unable to bind the request body", zap.Error(err))
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
@@ -32,13 +32,12 @@ func LoginOtpController(c *gin.Context) {
 	// generating jwt token
 	token, err := middlewares.GenerateToken(request.Email)
 	if err != nil {
-		logger.Error(err.Error())
+		logger.Error("unable to generate token", zap.Error(err))
 		c.JSON(http.StatusServiceUnavailable, gin.H{
 			"error":   err.Error(),
 			"message": "Unable to generate token for authentication",
 		})
 		return
-
 	}
 
 	// sending response

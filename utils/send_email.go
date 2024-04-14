@@ -35,7 +35,7 @@ func SendEmail(recipient string, subject string, otp int) error {
 	// int to string conversion of port
 	port, err := strconv.Atoi(smtpPort)
 	if err != nil {
-		logger.Error(err.Error())
+		logger.Error("unable to convert port to integer", zap.Error(err))
 		return err
 	}
 
@@ -45,7 +45,7 @@ func SendEmail(recipient string, subject string, otp int) error {
 	// sending email
 	err = dialer.DialAndSend(message)
 	if err != nil {
-		logger.Error(err.Error())
+		logger.Error("unable to send email", zap.Error(err))
 		return err
 	}
 	return nil

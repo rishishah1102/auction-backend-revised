@@ -56,14 +56,14 @@ func main() {
 		logger.Info("The server is running on http://localhost:" + os.Getenv("PORT"))
 		err := server.ListenAndServe()
 		if err != nil && err != http.ErrServerClosed {
-			logger.Error(err.Error())
+			logger.Error("unable to start the server", zap.Error(err))
 		}
 	}()
 
 	// Connecting with database
 	err = database.ConnectDB(logger, mongoConfig)
 	if err != nil {
-		logger.Error(err.Error())
+		logger.Error("unable to connect with database", zap.Error(err))
 		return
 	}
 	defer database.DisconnectDB(logger)
@@ -74,7 +74,7 @@ func main() {
 	// Shutting down the server gracefully
 	err = server.Shutdown(ctx)
 	if err != nil {
-		logger.Error(err.Error())
+		logger.Error("error in gracefull shutdown of server", zap.Error(err))
 	}
 	logger.Info("Server stopped")
 }

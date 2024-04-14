@@ -1,7 +1,7 @@
 package add_all_player
 
 import (
-	"auction-backend/database"
+	"auction-backend/models"
 	"auction-backend/schemas"
 	"auction-backend/utils"
 	"context"
@@ -27,15 +27,22 @@ func AddPlayerController(c *gin.Context) {
 
 	// binding data from request body
 	if err := c.ShouldBind(&players); err != nil {
-		logger.Error(err.Error())
+		logger.Error("unable to bind the request body", zap.Error(err))
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
 	} else {
 		for _, player := range players {
+			// calling matches model
+			matchesCollection, err := models.MatchesCollection(logger)
+			if err != nil {
+				logger.Error("unable to get matches collection", zap.Error(err))
+				return
+			}
+
 			// making a match model for every player
 			var match schemas.Match
-			matchData, err := database.Matches.InsertOne(context.Background(), bson.M{
+			matchData, err := matchesCollection.InsertOne(context.Background(), bson.M{
 				"match1":            match.Match1,
 				"match2":            match.Match2,
 				"match3":            match.Match3,
@@ -57,7 +64,7 @@ func AddPlayerController(c *gin.Context) {
 				"prevBenchedPoints": match.PrevBenchedPoints,
 			})
 			if err != nil {
-				logger.Error(err.Error())
+				logger.Error("unable to create a matches instance", zap.Error(err))
 				c.JSON(http.StatusInternalServerError, gin.H{
 					"error": err.Error(),
 				})
@@ -75,8 +82,15 @@ func AddPlayerController(c *gin.Context) {
 			}
 			player.Match = insertedId
 
+			// player collection
+			playersCollection, err := models.PlayersCollection(logger)
+			if err != nil {
+				logger.Error("unable to get players collection", zap.Error(err))
+				return
+			}
+
 			// inserting player into database
-			_, err = database.Players.InsertOne(context.Background(), bson.M{
+			_, err = playersCollection.InsertOne(context.Background(), bson.M{
 				"playerNumber":         player.PlayerNumber,
 				"playerName":           player.PlayerName,
 				"country":              player.Country,
@@ -93,7 +107,7 @@ func AddPlayerController(c *gin.Context) {
 				"unsold":               player.Unsold,
 			})
 			if err != nil {
-				logger.Error(err.Error())
+				logger.Error("unable to create a players instance", zap.Error(err))
 				c.JSON(http.StatusInternalServerError, gin.H{
 					"error": err.Error(),
 				})

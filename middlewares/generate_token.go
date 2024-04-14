@@ -1,7 +1,6 @@
 package middlewares
 
 import (
-	"fmt"
 	"os"
 	"time"
 
@@ -17,9 +16,10 @@ func GenerateToken(email string) (string, error) {
 
 	// Set claims
 	claims := token.Claims.(jwt.MapClaims)
-	fmt.Println(claims, email)
+
 	// setting data to token
 	claims["email"] = email
+
 	// Token expiration time
 	claims["exp"] = time.Now().Add(time.Hour * 24 * 365).Unix()
 

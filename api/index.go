@@ -11,6 +11,10 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+var (
+	router *gin.Engine
+)
+
 func CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
@@ -26,7 +30,7 @@ func CORSMiddleware() gin.HandlerFunc {
 	}
 }
 
-func Handler(w http.ResponseWriter, r *http.Request) {
+func Init() {
 	gin.SetMode(gin.ReleaseMode)
 
 	// Reading yaml file
@@ -55,9 +59,11 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 	defer database.DisconnectDB(logger)
 
-	//user_routes
+	// user_routes
 	routes.EndPoints(router)
+}
 
+func Handler(w http.ResponseWriter, r *http.Request) {
 	// serverless
 	router.ServeHTTP(w, r)
 }

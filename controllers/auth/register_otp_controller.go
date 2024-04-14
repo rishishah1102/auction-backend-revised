@@ -1,12 +1,11 @@
 package auth
 
 import (
-	"auction-backend/database"
 	"auction-backend/middlewares"
+	"auction-backend/models"
 	"auction-backend/schemas"
 	"auction-backend/utils"
 	"context"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -32,10 +31,15 @@ func RegisterOtpController(c *gin.Context) {
 		return
 	}
 
-	fmt.Println(request.Squad)
+	// fetching the user collection
+	usersCollection, err := models.UsersCollection(logger)
+	if err != nil {
+		logger.Error("unable to get matches collection", zap.Error(err))
+		return
+	}
 
 	// saving into the database
-	_, err = database.Users.InsertOne(context.Background(), bson.M{"email": request.Email, "username": request.Username, "ImgUrl": request.ImgUrl, "teamname": request.Teamname, "squad": request.Squad, "isPlaying": request.IsPlaying, "isAuctioneer": request.IsAuctioneer})
+	_, err = usersCollection.InsertOne(context.Background(), bson.M{"email": request.Email, "username": request.Username, "ImgUrl": request.ImgUrl, "teamname": request.Teamname, "squad": request.Squad, "isPlaying": request.IsPlaying, "isAuctioneer": request.IsAuctioneer})
 	if err != nil {
 		logger.Error(err.Error())
 		c.JSON(http.StatusFound, gin.H{
