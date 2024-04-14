@@ -58,7 +58,7 @@ func init() {
 		logger.Error("unable to connect with mongodb database", zap.Error(err))
 		return
 	}
-	defer database.DisconnectDB(logger)
+	// defer database.DisconnectDB(logger)
 
 	//user_routes
 	routes.EndPoints(router)
