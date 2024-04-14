@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	router *gin.Engine
+	Router *gin.Engine
 )
 
 func CORSMiddleware() gin.HandlerFunc {
@@ -30,14 +30,14 @@ func CORSMiddleware() gin.HandlerFunc {
 	}
 }
 
-func Init() error {
+func Init() {
 	gin.SetMode(gin.ReleaseMode)
 
 	// Reading yaml file
 	logger, err := utils.ConfigLogger()
 	if err != nil {
-		zap.Must(zap.NewProduction()).Error("unable to initialize custom logger", zap.Error(err))
-		return err
+		zap.Must(zap.NewProduction()).Error("failed to initialize custom logger", zap.Error(err))
+		return
 	}
 
 	// mongo config
@@ -46,7 +46,8 @@ func Init() error {
 	mongoConfig.Database = os.Getenv("DATABASE_NAME")
 
 	// gin instance
-	router = gin.Default()
+	router := gin.Default()
+	Router = router
 
 	// cors
 	router.Use(CORSMiddleware())
@@ -54,18 +55,16 @@ func Init() error {
 	// Connecting with database
 	err = database.ConnectDB(logger, mongoConfig)
 	if err != nil {
-		logger.Error(err.Error())
-		return err
+		logger.Error("unable to connect with mongodb database", zap.Error(err))
+		return
 	}
 	defer database.DisconnectDB(logger)
 
-	// user_routes
+	//user_routes
 	routes.EndPoints(router)
-
-	return nil
 }
 
 func Handler(w http.ResponseWriter, r *http.Request) {
 	// serverless
-	router.ServeHTTP(w, r)
+	Router.ServeHTTP(w, r)
 }
