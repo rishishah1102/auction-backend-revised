@@ -4,11 +4,11 @@ import (
 	"auction-backend/database"
 	"auction-backend/routes"
 	"auction-backend/utils"
-	"fmt"
 	"net/http"
 	"os"
 
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 )
 
 var (
@@ -30,14 +30,14 @@ func CORSMiddleware() gin.HandlerFunc {
 	}
 }
 
-func Init() {
+func Init() error {
 	gin.SetMode(gin.ReleaseMode)
 
 	// Reading yaml file
 	logger, err := utils.ConfigLogger()
 	if err != nil {
-		fmt.Println(err)
-		return
+		zap.Must(zap.NewProduction()).Error("unable to initialize custom logger", zap.Error(err))
+		return err
 	}
 
 	// mongo config
@@ -46,7 +46,7 @@ func Init() {
 	mongoConfig.Database = os.Getenv("DATABASE_NAME")
 
 	// gin instance
-	router := gin.Default()
+	router = gin.Default()
 
 	// cors
 	router.Use(CORSMiddleware())
@@ -55,12 +55,14 @@ func Init() {
 	err = database.ConnectDB(logger, mongoConfig)
 	if err != nil {
 		logger.Error(err.Error())
-		return
+		return err
 	}
 	defer database.DisconnectDB(logger)
 
 	// user_routes
 	routes.EndPoints(router)
+
+	return nil
 }
 
 func Handler(w http.ResponseWriter, r *http.Request) {
