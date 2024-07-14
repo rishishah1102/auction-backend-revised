@@ -25,10 +25,10 @@ func EndPoints(router *gin.Engine) {
 	// LOGIN || METHOD POST
 	router.POST("/signin", auth.LoginController)
 
-	// // OTP PAGE TO SAVE USER || METHOD POST
+	// OTP PAGE TO SAVE USER || METHOD POST
 	router.POST("/otp", auth.RegisterOtpController)
 
-	// // OTP PAGE TO LOGIN USER || METHOD POST
+	// OTP PAGE TO LOGIN USER || METHOD POST
 	router.POST("/loginotp", auth.LoginOtpController)
 
 	// Player ADDING || METHOD POST
