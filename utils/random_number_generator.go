@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-// function to generate otp
+// GenerateRandomNumber generates otp
 func GenerateRandomNumber() int {
 	// Seeding the random number generator with current time
 	rng := rand.New(rand.NewSource(time.Now().UnixNano()))

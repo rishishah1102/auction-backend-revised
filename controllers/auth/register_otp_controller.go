@@ -14,6 +14,8 @@ import (
 )
 
 func RegisterOtpController(c *gin.Context) {
+	var request schemas.User
+
 	// Reading logger
 	logger, err := utils.ConfigLogger()
 	if err != nil {
@@ -21,8 +23,6 @@ func RegisterOtpController(c *gin.Context) {
 		return
 	}
 
-	// fetching data from body
-	var request schemas.User
 	if err := c.ShouldBindJSON(&request); err != nil {
 		logger.Error(err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -31,14 +31,12 @@ func RegisterOtpController(c *gin.Context) {
 		return
 	}
 
-	// fetching the user collection
 	usersCollection, err := models.UsersCollection(logger)
 	if err != nil {
 		logger.Error("unable to get matches collection", zap.Error(err))
 		return
 	}
 
-	// saving into the database
 	_, err = usersCollection.InsertOne(context.Background(), bson.M{"email": request.Email, "username": request.Username, "ImgUrl": request.ImgUrl, "teamname": request.Teamname, "squad": request.Squad, "isPlaying": request.IsPlaying, "isAuctioneer": request.IsAuctioneer})
 	if err != nil {
 		logger.Error(err.Error())
@@ -48,7 +46,7 @@ func RegisterOtpController(c *gin.Context) {
 		return
 	}
 
-	// generating jwt token
+	// Generating jwt token
 	token, err := middlewares.GenerateToken(request.Email)
 	if err != nil {
 		logger.Error(err.Error())
@@ -57,10 +55,8 @@ func RegisterOtpController(c *gin.Context) {
 			"message": "Unable to generate token for authentication",
 		})
 		return
-
 	}
 
-	// sending response
 	logger.Info("Registration successfully with " + request.Email)
 	c.JSON(http.StatusCreated, gin.H{
 		"message": "Registration Successfully",

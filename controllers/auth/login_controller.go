@@ -15,6 +15,8 @@ import (
 
 // This route logs in the user. It takes the email from user and sends otp
 func LoginController(c *gin.Context) {
+	var request, response schemas.User
+
 	// Reading logger
 	logger, err := utils.ConfigLogger()
 	if err != nil {
@@ -22,8 +24,6 @@ func LoginController(c *gin.Context) {
 		return
 	}
 
-	// fetching data from body
-	var request, response schemas.User
 	if err := c.ShouldBindJSON(&request); err != nil {
 		logger.Error("unable to bind the request body", zap.Error(err))
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -32,14 +32,12 @@ func LoginController(c *gin.Context) {
 		return
 	}
 
-	// fetching the user collection
 	usersCollection, err := models.UsersCollection(logger)
 	if err != nil {
 		logger.Error("unable to get users collection", zap.Error(err))
 		return
 	}
 
-	// find user in database
 	err = usersCollection.FindOne(context.Background(), bson.M{"email": request.Email}).Decode(&response)
 	if err != nil {
 		if err == mongo.ErrNoDocuments {
@@ -57,11 +55,11 @@ func LoginController(c *gin.Context) {
 		return
 	}
 
-	// generating opt
+	// Generating opt
 	otp := utils.GenerateRandomNumber()
 	logger.Info("otp generated successfully")
 
-	// sending email
+	// Sending email
 	if err := utils.SendEmail(request.Email, "Login Otp", otp); err != nil {
 		logger.Error("unable to send email", zap.Error(err))
 		c.JSON(http.StatusBadRequest, gin.H{
