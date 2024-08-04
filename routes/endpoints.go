@@ -15,7 +15,7 @@ func EndPoints(router *gin.Engine) {
 		c.String(http.StatusOK, "Welcome to Auction backend")
 	})
 
-	// making a group for authenticated endpoints
+	// Making a group for authenticated endpoints
 	authUsers := router.Group("/auth")
 	authUsers.Use(middlewares.VerifyToken)
 

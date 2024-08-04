@@ -19,5 +19,6 @@ func PlayersCollection(logger *zap.Logger) (*mongo.Collection, error) {
 		logger.Error("unable to make players collection")
 		return nil, errors.New("unable to make players collection")
 	}
+	
 	return playersCollection, nil
 }

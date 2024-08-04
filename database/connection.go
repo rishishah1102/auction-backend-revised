@@ -16,7 +16,7 @@ var (
 )
 
 func ConnectDB(logger *zap.Logger, mongoConfig utils.MongoConfig) error {
-	// connection with mongo Atlas
+	// Connection with mongo Atlas
 	clientOptions := options.Client().ApplyURI(mongoConfig.MongoUri)
 	cl, err := mongo.Connect(context.Background(), clientOptions)
 	if err != nil {
@@ -25,7 +25,7 @@ func ConnectDB(logger *zap.Logger, mongoConfig utils.MongoConfig) error {
 	}
 	Client = cl
 
-	// it checks whether the connection with MongoDb is established or not
+	// Checks whether the connection with MongoDb is established or not
 	err = Client.Ping(context.Background(), nil)
 	if err != nil {
 		logger.Error("failed to ping MongoDB", zap.Error(err))

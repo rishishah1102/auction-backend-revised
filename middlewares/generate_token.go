@@ -8,7 +8,7 @@ import (
 )
 
 func GenerateToken(email string) (string, error) {
-	// jwt Secret
+	// Jwt Secret
 	jwtKey := []byte(os.Getenv("TOKEN_SECRET"))
 
 	// Create a new token object
@@ -17,7 +17,7 @@ func GenerateToken(email string) (string, error) {
 	// Set claims
 	claims := token.Claims.(jwt.MapClaims)
 
-	// setting data to token
+	// Setting data to token
 	claims["email"] = email
 
 	// Token expiration time

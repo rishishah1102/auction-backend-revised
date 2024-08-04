@@ -10,8 +10,10 @@ import (
 	"go.uber.org/zap"
 )
 
-// this route is for logging in the user  and getting a token to make requests
-func LoginOtpController(c *gin.Context) {
+// This route is for log in the user and getting a token to make requests
+func LoginOtpController(ctx *gin.Context) {
+	var request schemas.User
+
 	// Reading logger
 	logger, err := utils.ConfigLogger()
 	if err != nil {
@@ -19,30 +21,27 @@ func LoginOtpController(c *gin.Context) {
 		return
 	}
 
-	// fetching data from body
-	var request schemas.User
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err := ctx.ShouldBindJSON(&request); err != nil {
 		logger.Error("unable to bind the request body", zap.Error(err))
-		c.JSON(http.StatusBadRequest, gin.H{
+		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
 		return
 	}
 
-	// generating jwt token
+	// Generating jwt token
 	token, err := middlewares.GenerateToken(request.Email)
 	if err != nil {
 		logger.Error("unable to generate token", zap.Error(err))
-		c.JSON(http.StatusServiceUnavailable, gin.H{
+		ctx.JSON(http.StatusServiceUnavailable, gin.H{
 			"error":   err.Error(),
 			"message": "Unable to generate token for authentication",
 		})
 		return
 	}
 
-	// sending response
 	logger.Info("Login successfully with " + request.Email)
-	c.JSON(http.StatusOK, gin.H{
+	ctx.JSON(http.StatusOK, gin.H{
 		"message": "Login Successfully",
 		"token":   token,
 	})

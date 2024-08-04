@@ -14,7 +14,9 @@ import (
 )
 
 // This route is for getting username and email from frontend and sending otp via email
-func RegisterController(c *gin.Context) {
+func RegisterController(ctx *gin.Context) {
+	var request, response schemas.User
+
 	// Reading logger
 	logger, err := utils.ConfigLogger()
 	if err != nil {
@@ -22,53 +24,52 @@ func RegisterController(c *gin.Context) {
 		return
 	}
 
-	// fetching data from body
-	var request, response schemas.User
-	if err := c.ShouldBindJSON(&request); err != nil {
+	if err := ctx.ShouldBindJSON(&request); err != nil {
 		logger.Error("unable to bind the request body", zap.Error(err))
-		c.JSON(http.StatusBadRequest, gin.H{
+		ctx.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),
 		})
 		return
 	}
 
-	// fetching the user collection
 	usersCollection, err := models.UsersCollection(logger)
 	if err != nil {
 		logger.Error("unable to get users collection", zap.Error(err))
 		return
 	}
 
-	// check if user exists in db
 	err = usersCollection.FindOne(context.Background(), bson.M{"email": request.Email}).Decode(&response)
 	if err == mongo.ErrNoDocuments {
-		// generating opt
+		// Generating OTP
 		otp := utils.GenerateRandomNumber()
 		logger.Info("otp generated successfully")
 
-		// sending email
+		// Sending email
 		if err := utils.SendEmail(request.Email, "Registration Otp", otp); err != nil {
 			logger.Error("unable to send email", zap.Error(err))
-			c.JSON(http.StatusBadRequest, gin.H{
+			ctx.JSON(http.StatusBadRequest, gin.H{
 				"error": err.Error(),
 			})
 		}
 
-		// sending response
 		logger.Info("OTP sent to the registered Email Id: " + request.Email)
-		c.JSON(http.StatusCreated, gin.H{
+		ctx.JSON(http.StatusCreated, gin.H{
 			"message": "Otp is send to " + request.Email,
 			"otp":     otp,
 		})
-	} else if err == nil {
+		return
+	}
+	
+	if err == nil {
 		logger.Warn("user already exist")
-		c.JSON(http.StatusConflict, gin.H{
+		ctx.JSON(http.StatusConflict, gin.H{
 			"message": "User already exists",
 		})
-	} else {
-		logger.Error("an error occured", zap.Error(err))
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+		return
 	}
+
+	logger.Error("an error occured", zap.Error(err))
+	ctx.JSON(http.StatusInternalServerError, gin.H{
+		"error": err.Error(),
+	})
 }

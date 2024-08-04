@@ -39,14 +39,15 @@ func SendEmail(recipient string, subject string, otp int) error {
 		return err
 	}
 
-	// new smtp client
+	// New SMTP Client
 	dialer := gomail.NewDialer(smtpHost, port, smtpUsername, smtpPassword)
 
-	// sending email
+	// Sending email
 	err = dialer.DialAndSend(message)
 	if err != nil {
 		logger.Error("unable to send email", zap.Error(err))
 		return err
 	}
+
 	return nil
 }

@@ -28,7 +28,8 @@ func ConfigLogger() (*zap.Logger, error) {
 			"app": "auction-backend",
 		},
 	}
-	// building zapper
+
+	// Building zapper
 	logger := zap.Must(config.Build())
 
 	return logger, nil
